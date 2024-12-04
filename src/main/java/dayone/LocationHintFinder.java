@@ -10,12 +10,13 @@ import java.util.*;
  */
 public class LocationHintFinder {
     public static void main(String[] args) throws FileNotFoundException {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("input.txt");
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d1_input.txt");
 
         List<Integer> l1 = new ArrayList<>();
         List<Integer> l2 = new ArrayList<>();
         Map<Integer, Integer> m = new HashMap<>();
 
+        assert inputStream != null;
         try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
             while (scanner.hasNextLine()) {
                 int n1 = scanner.nextInt();
