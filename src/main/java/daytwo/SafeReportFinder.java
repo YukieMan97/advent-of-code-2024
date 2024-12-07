@@ -4,12 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
-import java.util.stream.Collectors;
 
+/**
+ * Day 2 Part 1
+ */
 public class SafeReportFinder {
     private final static String POSITIVE = "positive";
     private final static String NEGATIVE = "negative";
@@ -18,41 +18,9 @@ public class SafeReportFinder {
     public static void main(String[] args) throws IOException {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
 
-        int prevNum = 0;
-        int currNum = 0;
+        int prevNum;
+        int currNum;
         int safeReports = 0;
-
-        // method1: store Map<Integer, Integer[]>, traverse through map to find numSafeReports
-//        assert inputStream != null;
-//        try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
-//            while (scanner.hasNextLine()) {
-//                currNum = scanner.nextInt();
-//                Boolean isInc = null;
-//
-//                while (scanner.hasNextInt()) {
-//                    prevNum = currNum;
-//                    currNum = scanner.nextInt();
-//
-//                    String res = isIncSafeDiff(isInc, prevNum, currNum);
-//
-//                    switch (res) {
-//                        case POSITIVE -> isInc = true;
-//                        case NEGATIVE -> isInc = false;
-//                        default -> {
-//                            continue;
-//                        }
-//                    }
-//
-//                    safeReports++;
-//                }
-//
-//                // todo compare second last and last num
-//            }
-//        }
-
-        // method2: line-by-line
-        //  - convert line into Integer[], now we know the numData
-        //  - iterate over Integer[], find num safeReports
 
         assert inputStream != null;
         InputStreamReader inStreamReader = new InputStreamReader(inputStream);
@@ -66,7 +34,7 @@ public class SafeReportFinder {
                         .map(Integer::parseInt)
                         .toList();
 
-                // assume there are at least 5 levels
+                // assumption: there are at least 5 levels
                 prevNum = levels.getFirst();
                 currNum = levels.get(1);
 
