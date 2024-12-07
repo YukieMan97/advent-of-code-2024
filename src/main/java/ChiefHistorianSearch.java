@@ -12,5 +12,5 @@ public class ChiefHistorianSearch {
                 safeReportFinder.getSafeReports(),
                 safeReportFinder.getUnsafeReports()
         );
-    } 
+    }
 }

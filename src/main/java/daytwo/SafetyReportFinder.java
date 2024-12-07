@@ -13,24 +13,21 @@ import java.util.List;
  */
 public class SafetyReportFinder {
     private int numSafeReports = 0;
-    private List<List<Integer>> safeReports;
-    private List<List<Integer>> unsafeReports;
+    private final List<List<Integer>> safeReports;
+    private final List<List<Integer>> unsafeReports;
 
     protected final static String POSITIVE = "positive";
     protected final static String NEGATIVE = "negative";
     protected final static String UNSAFE = "unsafe";
 
     public SafetyReportFinder() throws IOException {
-        this.safeReports = new ArrayList<>();
-        this.unsafeReports = new ArrayList<>();
-
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
-
-        int prevLvl;
-        int currLvl;
 
         assert inputStream != null;
         InputStreamReader inStreamReader = new InputStreamReader(inputStream);
+
+        this.safeReports = new ArrayList<>();
+        this.unsafeReports = new ArrayList<>();
 
         findSafeAndUnsafeReports(inStreamReader);
 
@@ -52,6 +49,8 @@ public class SafetyReportFinder {
     private void findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws IOException {
         int prevLvl;
         int currLvl;
+        int numSafeReports = 0;
+
         try (BufferedReader reader = new BufferedReader(inStreamReader)) {
             while (reader.ready()) {
                 String line = reader.readLine();
@@ -95,6 +94,8 @@ public class SafetyReportFinder {
                 }
             }
         }
+
+        this.numSafeReports = numSafeReports;
     }
 
     protected static String isIncSafeDiff(Boolean givenInc, int prevNum, int currNum) {
