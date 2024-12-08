@@ -153,7 +153,6 @@ public class SafetyReportFinder {
         System.out.println(line);
 
         // keep track of unsafe indexes?
-        // categorize unsafe diff
 
         // cases to account for
         int posCnt = 0;
