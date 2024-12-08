@@ -28,10 +28,7 @@ public class SafetyReportFinder {
 
         this.safeReports = new ArrayList<>();
         this.unsafeReports = new ArrayList<>();
-
-        findSafeAndUnsafeReports(inStreamReader);
-
-        System.out.println("Safe Reports: " + numSafeReports);
+        this.numSafeReports = findSafeAndUnsafeReports(inStreamReader);
     }
 
     public int getNumSafeReports() {
@@ -46,13 +43,15 @@ public class SafetyReportFinder {
         return safeReports;
     }
 
-    private void findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws IOException {
+    private int findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws IOException {
         int prevLvl;
         int currLvl;
         int numSafeReports = 0;
+        int numEntries = 0;
 
         try (BufferedReader reader = new BufferedReader(inStreamReader)) {
             while (reader.ready()) {
+                numEntries++;
                 String line = reader.readLine();
                 System.out.println(line);
 
@@ -71,6 +70,8 @@ public class SafetyReportFinder {
                     case POSITIVE -> isInc = true;
                     case NEGATIVE -> isInc = false;
                     default -> {
+                        this.unsafeReports.add(rowOfLevels);
+
                         continue;
                     }
                 }
@@ -95,7 +96,12 @@ public class SafetyReportFinder {
             }
         }
 
-        this.numSafeReports = numSafeReports;
+        System.out.println("numEntries: " + numEntries);
+        System.out.println("numSafeReports: " + numSafeReports);
+        System.out.println("safeReports.size: " + safeReports.size());
+        System.out.println("unsafeReports.size: " + unsafeReports.size());
+
+        return numSafeReports;
     }
 
     protected static String isIncSafeDiff(Boolean givenInc, int prevNum, int currNum) {
