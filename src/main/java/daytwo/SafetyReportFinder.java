@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Day2 Part1
@@ -12,8 +14,7 @@ import java.util.*;
 public class SafetyReportFinder {
     private int numSafeReports = 0;
     private final List<List<Integer>> safeReports;
-    // assumption: each row is distinct
-    private final Map<List<Integer>, Integer> unsafeLvlToReports;
+    private final List<List<Integer>> unsafeReports;
 
     protected final static String POSITIVE = "positive";
     protected final static String NEGATIVE = "negative";
@@ -26,7 +27,7 @@ public class SafetyReportFinder {
         InputStreamReader inStreamReader = new InputStreamReader(inputStream);
 
         this.safeReports = new ArrayList<>();
-        this.unsafeLvlToReports = new HashMap<>();
+        this.unsafeReports = new ArrayList<>();
         this.numSafeReports = findSafeAndUnsafeReports(inStreamReader);
     }
 
@@ -34,8 +35,8 @@ public class SafetyReportFinder {
         return numSafeReports;
     }
 
-    public Map<List<Integer>, Integer> getUnsafeLvlToReports() {
-        return unsafeLvlToReports;
+    public List<List<Integer>> getUnsafeReports() {
+        return unsafeReports;
     }
 
     public List<List<Integer>> getSafeReports() {
@@ -59,9 +60,8 @@ public class SafetyReportFinder {
                         .toList();
 
                 // assumption: there are at least 5 levels
-                int index = 1;
                 prevLvl = rowOfLevels.getFirst();
-                currLvl = rowOfLevels.get(index);
+                currLvl = rowOfLevels.get(1);
 
                 String res = isIncSafeDiff(null, prevLvl, currLvl);
                 boolean isInc;
@@ -70,25 +70,20 @@ public class SafetyReportFinder {
                     case POSITIVE -> isInc = true;
                     case NEGATIVE -> isInc = false;
                     default -> {
-                        this.unsafeLvlToReports.put(rowOfLevels, index);
+                        this.unsafeReports.add(rowOfLevels);
 
                         continue;
                     }
                 }
 
-                index = 2;
-                for (int i = index; i < rowOfLevels.size(); i++) {
+                for (int i = 2; i < rowOfLevels.size(); i++) {
                     prevLvl = currLvl;
                     currLvl = rowOfLevels.get(i);
                     res = isIncSafeDiff(isInc, prevLvl, currLvl);
 
                     if (res == UNSAFE) {
-                        this.unsafeLvlToReports.put(rowOfLevels, index);
-
                         break;
                     }
-
-                    index++;
                 }
 
                 if (res != UNSAFE) {
@@ -96,7 +91,7 @@ public class SafetyReportFinder {
 
                     numSafeReports++;
                 } else {
-                    this.unsafeLvlToReports.put(rowOfLevels, index);
+                    this.unsafeReports.add(rowOfLevels);
                 }
             }
         }
@@ -104,7 +99,7 @@ public class SafetyReportFinder {
         System.out.println("numEntries: " + numEntries);
         System.out.println("numSafeReports: " + numSafeReports);
         System.out.println("safeReports.size: " + safeReports.size());
-        System.out.println("unsafeReports.size: " + unsafeLvlToReports.size());
+        System.out.println("unsafeReports.size: " + unsafeReports.size());
 
         return numSafeReports;
     }
