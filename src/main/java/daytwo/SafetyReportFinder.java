@@ -106,10 +106,10 @@ public class SafetyReportFinder {
             }
         }
 
-        System.out.println("numEntries: " + numEntries);
-        System.out.println("numSafeReports: " + numSafeReports);
-        System.out.println("safeReports.size: " + safeReports.size());
-        System.out.println("unsafeReports.size: " + unsafeReports.size());
+        System.out.println("numEntries: " + numEntries + "; expected 1000");
+        System.out.println("numSafeReports: " + numSafeReports + "; expected 516");
+        System.out.println("safeReports.size: " + safeReports.size() + "; expected 516");
+        System.out.println("unsafeReports.size: " + unsafeReports.size() + "; expected 484");
 
         return numSafeReports;
     }
