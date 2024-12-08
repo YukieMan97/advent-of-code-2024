@@ -2,6 +2,7 @@ package daytwo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Day2 Part2
@@ -9,18 +10,18 @@ import java.util.List;
 public class TolerableSafetyReportFinder extends SafetyReportFinder {
     private int numSafeReports;
     private List<List<Integer>> safeReports;
-    private List<List<Integer>> unsafeReports;
+    private Map<List<Integer>, Integer> unsafeLvlToReports;
 
     public TolerableSafetyReportFinder(
         int numSafeReports,
         List<List<Integer>> safeReports,
-        List<List<Integer>> unsafeReports
+        Map<List<Integer>, Integer> unsafeLvlToReports
     ) throws IOException {
          this.numSafeReports = numSafeReports;
          this.safeReports = safeReports;
-         this.unsafeReports = unsafeReports;
+         this.unsafeLvlToReports = unsafeLvlToReports;
 
-         for (int i = 0; i < unsafeReports.size(); i++) {
+         for (int i = 0; i < unsafeLvlToReports.size(); i++) {
 
          }
     }
