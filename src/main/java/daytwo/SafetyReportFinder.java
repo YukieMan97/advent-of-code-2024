@@ -16,9 +16,11 @@ public class SafetyReportFinder {
     private final List<List<Integer>> safeReports;
     private final List<List<Integer>> unsafeReports;
 
-    protected final static String POSITIVE = "positive";
-    protected final static String NEGATIVE = "negative";
-    protected final static String UNSAFE = "unsafe";
+    protected final static String POSITIVE = "POSITIVE";
+    protected final static String NEGATIVE = "NEGATIVE";
+    protected final static String EQUAL = "EQUAL";
+    protected final static String BIG_DIFF = "BIG_DIFF";
+    protected final static String UNSAFE = "UNSAFE";
 
     public SafetyReportFinder() throws IOException {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
@@ -53,45 +55,53 @@ public class SafetyReportFinder {
             while (reader.ready()) {
                 numEntries++;
                 String line = reader.readLine();
-                System.out.println(line);
+//                System.out.println(line);
 
                 List<Integer> rowOfLevels = Arrays.stream(line.split("\\s"))
                         .map(Integer::parseInt)
                         .toList();
 
                 // assumption: there are at least 5 levels
+                int index = 0;
                 prevLvl = rowOfLevels.getFirst();
-                currLvl = rowOfLevels.get(1);
+                currLvl = rowOfLevels.get(index + 1);
 
-                String res = isIncSafeDiff(null, prevLvl, currLvl);
+                String resDiff = findSafeDiff(prevLvl, currLvl);
                 boolean isInc;
 
-                switch (res) {
+                switch (resDiff) {
                     case POSITIVE -> isInc = true;
                     case NEGATIVE -> isInc = false;
                     default -> {
-                        this.unsafeReports.add(rowOfLevels);
+                        handleUnsafeReports(rowOfLevels, index, line, resDiff);
 
                         continue;
                     }
                 }
 
-                for (int i = 2; i < rowOfLevels.size(); i++) {
+                String res = isIncSafeDiff(isInc, resDiff);
+                index = 2;
+
+                for (int i = index; i < rowOfLevels.size(); i++) {
                     prevLvl = currLvl;
                     currLvl = rowOfLevels.get(i);
-                    res = isIncSafeDiff(isInc, prevLvl, currLvl);
+
+                    resDiff = findSafeDiff(prevLvl, currLvl);
+                    res = isIncSafeDiff(isInc, resDiff);
 
                     if (res == UNSAFE) {
+                        handleUnsafeReports(rowOfLevels, index, line, resDiff);
+
                         break;
                     }
+
+                    index++;
                 }
 
                 if (res != UNSAFE) {
                     this.safeReports.add(rowOfLevels);
 
                     numSafeReports++;
-                } else {
-                    this.unsafeReports.add(rowOfLevels);
                 }
             }
         }
@@ -104,20 +114,7 @@ public class SafetyReportFinder {
         return numSafeReports;
     }
 
-    protected static String isIncSafeDiff(Boolean givenInc, int prevNum, int currNum) {
-        Boolean isInc = givenInc;
-        String diffRes = findSafeDiff(prevNum, currNum);
-
-        if (isInc == null) {
-            switch (diffRes) {
-                case POSITIVE -> isInc = true;
-                case NEGATIVE -> isInc = false;
-                default -> {
-                    return UNSAFE;
-                }
-            }
-        }
-
+    protected static String isIncSafeDiff(boolean isInc, String diffRes) {
         if (isInc && diffRes == POSITIVE) {
             return POSITIVE;
         }
@@ -132,14 +129,45 @@ public class SafetyReportFinder {
     protected static String findSafeDiff(int prevNum, int currNum) {
         int diff = currNum - prevNum;
 
-        if (diff >= 1 && diff <= 3) {
+        if (diff == 0) {
+            return EQUAL;
+        }
+
+        if (diff > 0 && diff <= 3) {
             return POSITIVE;
         }
 
-        if (diff >= -3 && diff <= -1) {
+        if (diff < 0 && diff >= -3) {
             return NEGATIVE;
         }
 
-        return UNSAFE;
+        return BIG_DIFF;
+    }
+
+    private void handleUnsafeReports(
+            List<Integer> rowOfLevels,
+            int currUnsafeIndex,
+            String line,
+            String resDiff
+    ) {
+        System.out.println(line);
+
+        // keep track of unsafe indexes?
+        // categorize unsafe diff
+
+        // cases to account for
+        int posCnt = 0;
+        int negCnt = 0;
+        int eqCnt = 0;
+
+        // positive > negative and/or equal, remove at most 1 level
+            // safe:   10 20 30 40 60 50  or  10 20 30 40 50 50
+            // unsafe: 10 20 30 40 30 40  or  10 20 30 40 30 20
+        // negative > positive and/or equal, remove at most 1 level
+            // safe:   60 50 40 50 30  or  60 50 40 30 20 20
+            // unsafe: 60 50 40 50 40  or  60 50 40 50 60
+        // unsafe when negative == positive, positive == equal, or negative == equal
+
+        this.unsafeReports.add(rowOfLevels);
     }
 }
