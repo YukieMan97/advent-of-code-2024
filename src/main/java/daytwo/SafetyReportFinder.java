@@ -69,33 +69,39 @@ public class SafetyReportFinder {
                 prevLvl = rowOfLevels.getFirst();
                 currLvl = rowOfLevels.get(index + 1);
 
-                String currResultDiff = findSafeDiff(prevLvl, currLvl);
+                String currDiff = findSafeDiff(prevLvl, currLvl);
                 boolean isInc;
 
-                switch (currResultDiff) {
+                switch (currDiff) {
                     case INCREASING -> isInc = true;
                     case DECREASING -> isInc = false;
                     default -> {
-                        handleUnsafeReports(rowOfLevels, index, line, currResultDiff);
+                        handleUnsafeReports(
+                            rowOfLevels,
+                            index + 1,
+                            line,
+                            null,
+                            currDiff
+                        );
 
                         continue;
                     }
                 }
 
-                String prevResultDiff;
-                String consistentResultDiff = isConsistentDiff(isInc, currResultDiff);
+                String prevDiff;
+                String validatedDiff = validateDirectionConsistency(isInc, currDiff);
                 index = 2;
 
                 for (int i = index; i < rowOfLevels.size(); i++) {
-                    prevResultDiff = currResultDiff;
+                    prevDiff = currDiff;
                     prevLvl = currLvl;
                     currLvl = rowOfLevels.get(i);
 
-                    currResultDiff = findSafeDiff(prevLvl, currLvl);
-                    consistentResultDiff = isConsistentDiff(isInc, currResultDiff);
+                    currDiff = findSafeDiff(prevLvl, currLvl);
+                    validatedDiff = validateDirectionConsistency(isInc, currDiff);
 
-                    if (consistentResultDiff == UNSAFE) {
-                        handleUnsafeReports(rowOfLevels, index, line, prevResultDiff);
+                    if (validatedDiff == UNSAFE) {
+                        handleUnsafeReports(rowOfLevels, index, line, prevDiff, currDiff);
 
                         break;
                     }
@@ -103,7 +109,7 @@ public class SafetyReportFinder {
                     index++;
                 }
 
-                if (consistentResultDiff != UNSAFE) {
+                if (validatedDiff != UNSAFE) {
                     this.safeReports.add(rowOfLevels);
 
                     numSafeReports++;
@@ -119,18 +125,24 @@ public class SafetyReportFinder {
         return numSafeReports;
     }
 
-    protected static String isConsistentDiff(boolean isInc, String diffRes) {
-        if (isInc && diffRes == INCREASING) {
+    protected static String validateDirectionConsistency(boolean isInc, String resultDiff) {
+        if (isInc && resultDiff == INCREASING) {
             return INCREASING;
         }
 
-        if (!isInc && diffRes == DECREASING) {
+        if (!isInc && resultDiff == DECREASING) {
             return DECREASING;
         }
 
         return UNSAFE;
     }
 
+    /**
+     * Safe Difference means increasing or decreasing and a difference of 1-3 (inclusive).
+     * @param prevNum
+     * @param currNum
+     * @return
+     */
     protected static String findSafeDiff(int prevNum, int currNum) {
         int diff = currNum - prevNum;
 
@@ -151,11 +163,14 @@ public class SafetyReportFinder {
 
     private void handleUnsafeReports(
             List<Integer> rowOfLevels,
-            int currUnsafeIndex,
+            int indexToCheck,
             String line,            // for sout
-            String resDiff
+            String prevDiff,
+            String currDiff
     ) {
         System.out.println(line);
         this.unsafeReports.add(rowOfLevels);
+
+
     }
 }
