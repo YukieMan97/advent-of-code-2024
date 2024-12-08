@@ -16,8 +16,8 @@ public class SafetyReportFinder {
     private final List<List<Integer>> safeReports;
     private final List<List<Integer>> unsafeReports;
 
-    protected final static String POSITIVE = "POSITIVE";
-    protected final static String NEGATIVE = "NEGATIVE";
+    protected final static String INCREASING = "POSITIVE";
+    protected final static String DECREASING = "NEGATIVE";
     protected final static String EQUAL = "EQUAL";
     protected final static String BIG_DIFF = "BIG_DIFF";
     protected final static String UNSAFE = "UNSAFE";
@@ -57,6 +57,9 @@ public class SafetyReportFinder {
                 String line = reader.readLine();
 //                System.out.println(line);
 
+                // if first and last indexes are unsafe, then they should be considered safe
+                // if middle indexes are unsafe...
+
                 List<Integer> rowOfLevels = Arrays.stream(line.split("\\s"))
                         .map(Integer::parseInt)
                         .toList();
@@ -66,31 +69,33 @@ public class SafetyReportFinder {
                 prevLvl = rowOfLevels.getFirst();
                 currLvl = rowOfLevels.get(index + 1);
 
-                String resDiff = findSafeDiff(prevLvl, currLvl);
+                String currResultDiff = findSafeDiff(prevLvl, currLvl);
                 boolean isInc;
 
-                switch (resDiff) {
-                    case POSITIVE -> isInc = true;
-                    case NEGATIVE -> isInc = false;
+                switch (currResultDiff) {
+                    case INCREASING -> isInc = true;
+                    case DECREASING -> isInc = false;
                     default -> {
-                        handleUnsafeReports(rowOfLevels, index, line, resDiff);
+                        handleUnsafeReports(rowOfLevels, index, line, currResultDiff);
 
                         continue;
                     }
                 }
 
-                String res = isIncSafeDiff(isInc, resDiff);
+                String prevResultDiff;
+                String consistentResultDiff = isConsistentDiff(isInc, currResultDiff);
                 index = 2;
 
                 for (int i = index; i < rowOfLevels.size(); i++) {
+                    prevResultDiff = currResultDiff;
                     prevLvl = currLvl;
                     currLvl = rowOfLevels.get(i);
 
-                    resDiff = findSafeDiff(prevLvl, currLvl);
-                    res = isIncSafeDiff(isInc, resDiff);
+                    currResultDiff = findSafeDiff(prevLvl, currLvl);
+                    consistentResultDiff = isConsistentDiff(isInc, currResultDiff);
 
-                    if (res == UNSAFE) {
-                        handleUnsafeReports(rowOfLevels, index, line, resDiff);
+                    if (consistentResultDiff == UNSAFE) {
+                        handleUnsafeReports(rowOfLevels, index, line, prevResultDiff);
 
                         break;
                     }
@@ -98,7 +103,7 @@ public class SafetyReportFinder {
                     index++;
                 }
 
-                if (res != UNSAFE) {
+                if (consistentResultDiff != UNSAFE) {
                     this.safeReports.add(rowOfLevels);
 
                     numSafeReports++;
@@ -114,13 +119,13 @@ public class SafetyReportFinder {
         return numSafeReports;
     }
 
-    protected static String isIncSafeDiff(boolean isInc, String diffRes) {
-        if (isInc && diffRes == POSITIVE) {
-            return POSITIVE;
+    protected static String isConsistentDiff(boolean isInc, String diffRes) {
+        if (isInc && diffRes == INCREASING) {
+            return INCREASING;
         }
 
-        if (!isInc && diffRes == NEGATIVE) {
-            return NEGATIVE;
+        if (!isInc && diffRes == DECREASING) {
+            return DECREASING;
         }
 
         return UNSAFE;
@@ -134,11 +139,11 @@ public class SafetyReportFinder {
         }
 
         if (diff > 0 && diff <= 3) {
-            return POSITIVE;
+            return INCREASING;
         }
 
         if (diff < 0 && diff >= -3) {
-            return NEGATIVE;
+            return DECREASING;
         }
 
         return BIG_DIFF;
@@ -147,7 +152,7 @@ public class SafetyReportFinder {
     private void handleUnsafeReports(
             List<Integer> rowOfLevels,
             int currUnsafeIndex,
-            String line,
+            String line,            // for sout
             String resDiff
     ) {
         System.out.println(line);
