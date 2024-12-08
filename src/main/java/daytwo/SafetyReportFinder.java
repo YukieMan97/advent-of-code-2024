@@ -151,22 +151,6 @@ public class SafetyReportFinder {
             String resDiff
     ) {
         System.out.println(line);
-
-        // keep track of unsafe indexes?
-
-        // cases to account for
-        int posCnt = 0;
-        int negCnt = 0;
-        int eqCnt = 0;
-
-        // positive > negative and/or equal, remove at most 1 level
-            // safe:   10 20 30 40 60 50  or  10 20 30 40 50 50
-            // unsafe: 10 20 30 40 30 40  or  10 20 30 40 30 20
-        // negative > positive and/or equal, remove at most 1 level
-            // safe:   60 50 40 50 30  or  60 50 40 30 20 20
-            // unsafe: 60 50 40 50 40  or  60 50 40 50 60
-        // unsafe when negative == positive, positive == equal, or negative == equal
-
         this.unsafeReports.add(rowOfLevels);
     }
 }
