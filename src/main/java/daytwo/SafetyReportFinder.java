@@ -21,6 +21,7 @@ public class SafetyReportFinder {
     protected final static String EQUAL = "EQUAL";
     protected final static String BIG_DIFF = "BIG_DIFF";
     protected final static String UNSAFE = "UNSAFE";
+    protected final static String SAFE = "SAFE";
 
     public SafetyReportFinder() throws IOException {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
@@ -90,7 +91,11 @@ public class SafetyReportFinder {
                     res = isIncSafeDiff(isInc, resDiff);
 
                     if (res == UNSAFE) {
-                        handleUnsafeReports(rowOfLevels, index, line, resDiff);
+                        if (index + 1 == rowOfLevels.size()) {
+                            res = SAFE;
+                        } else {
+                            res = handleUnsafeReports(rowOfLevels, index, line, resDiff);
+                        }
 
                         break;
                     }
@@ -107,9 +112,9 @@ public class SafetyReportFinder {
         }
 
         System.out.println("numEntries: " + numEntries + "; expected 1000");
-        System.out.println("numSafeReports: " + numSafeReports + "; expected 516");
-        System.out.println("safeReports.size: " + safeReports.size() + "; expected 516");
-        System.out.println("unsafeReports.size: " + unsafeReports.size() + "; expected 484");
+        System.out.println("numSafeReports: " + numSafeReports + "; Non-tolerable size: 516");
+        System.out.println("safeReports.size: " + safeReports.size() + "; Non-tolerable size: 516");
+        System.out.println("unsafeReports.size: " + unsafeReports.size() + "; Non-tolerable size: 484");
 
         return numSafeReports;
     }
@@ -144,29 +149,66 @@ public class SafetyReportFinder {
         return BIG_DIFF;
     }
 
-    private void handleUnsafeReports(
+    private String handleUnsafeReports(
             List<Integer> rowOfLevels,
             int currUnsafeIndex,
             String line,
-            String resDiff
+            String givenResDiff
     ) {
+        System.out.println("Check if unsafe: ");
         System.out.println(line);
 
-        // keep track of unsafe indexes?
+        int prevLvl = rowOfLevels.get(currUnsafeIndex);
+        int currLvl = rowOfLevels.get(currUnsafeIndex + 1);
 
-        // cases to account for
-        int posCnt = 0;
-        int negCnt = 0;
-        int eqCnt = 0;
+        String nextResDiff = findSafeDiff(prevLvl, currLvl);
+        boolean isInc;
 
-        // positive > negative and/or equal, remove at most 1 level
+        switch (givenResDiff) {
+            case POSITIVE -> isInc = true;
+            case NEGATIVE -> isInc = false;
+            default -> {
+                System.out.println("UNSAFE");
+                this.unsafeReports.add(rowOfLevels);
+
+                return UNSAFE;
+            }
+        }
+
+        String res = isIncSafeDiff(isInc, nextResDiff);
+        int index = currUnsafeIndex + 2;
+
+        for (int i = index; i < rowOfLevels.size(); i++) {
+            prevLvl = currLvl;
+            currLvl = rowOfLevels.get(i);
+
+            String resDiff = findSafeDiff(prevLvl, currLvl);
+            res = isIncSafeDiff(isInc, resDiff);
+
+            if (res == UNSAFE) {
+                // if last index causes row to be unsafe, that is fine.
+                if (index + 1 == rowOfLevels.size()) {
+                    System.out.println("SAFE!");
+                    res = SAFE;
+                } else {
+                    System.out.println("UNSAFE!");
+                    this.unsafeReports.add(rowOfLevels);
+                }
+
+                break;
+            }
+
+            index++;
+        }
+
+        return res;
+
+        // positive > negative and/or equal, remove at most 1 level?
             // safe:   10 20 30 40 60 50  or  10 20 30 40 50 50
             // unsafe: 10 20 30 40 30 40  or  10 20 30 40 30 20
-        // negative > positive and/or equal, remove at most 1 level
+        // negative > positive and/or equal, remove at most 1 level?
             // safe:   60 50 40 50 30  or  60 50 40 30 20 20
             // unsafe: 60 50 40 50 40  or  60 50 40 50 60
-        // unsafe when negative == positive, positive == equal, or negative == equal
-
-        this.unsafeReports.add(rowOfLevels);
+        // unsafe when negative == positive, positive == equal, or negative == equal?
     }
 }
