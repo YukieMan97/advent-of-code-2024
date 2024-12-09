@@ -192,29 +192,31 @@ public class SafetyReportFinder {
         // if first and last indexes are unsafe, then they should be considered safe
         // if middle indexes are unsafe...
 
+        // todo remove unsafe level from list and continue checking, since two pointer is not working.
+        //  new head/tail pointers are set incorrectly somehow
+
         // case: first to second index is unsafe
         if (prevDiff == null) {
             validateUnsafeReportOfFirstIndex(rowOfLevels, currIndex);
         } else {
             System.out.println("Handle middle indexes");
 
-
-            // todo find new currDiff
             int prevLvl;
             int currLvl;
+            boolean secondIndexUnsafe = currIndex == 2;
 
-            if (givenCurrDiff == EQUAL) {
-                // want to check if 2nd EQUAL level is safe with next level
+            // note: prevDiff is the expected diff, since currDiff is invalid caused by get(i - 2) and get(i - 1).
+            // thus, need to check if currIndex (i) is safe with prevPrevIndex (i - 2)
+
+            if (secondIndexUnsafe) {
                 prevLvl = rowOfLevels.get(currIndex);
-
-                currIndex++;
-                currLvl = rowOfLevels.get(currIndex);
             } else {
-                // note: prevDiff is the expected diff, since currDiff is invalid caused by get(i - 2) and get(i - 1).
-                // thus, need to check if currIndex (i) is safe with prevPrevIndex (i - 2)
                 prevLvl = rowOfLevels.get(currIndex - 1);
-                currLvl = rowOfLevels.get(currIndex);
             }
+
+
+            currIndex++;
+            currLvl = rowOfLevels.get(currIndex);
 
             String currDiff = findSafeDiff(prevLvl, currLvl);
             boolean isInc;
@@ -224,18 +226,19 @@ public class SafetyReportFinder {
                 case DECREASING -> isInc = false;
                 default -> {
                     // at this point, two UNSAFE's thus return.
-                    System.out.println("UNSAFE 3!");
+                    System.out.println("UNSAFE 3: " + currDiff);
                     this.unsafeReports.add(rowOfLevels);
 
                     return;
                 }
             }
 
+            // it is considered safe if the first direction change is a one-off,
+            // so index > 3 with direction change is unsafe
             if (currIndex > 3) {
-                // it is considered safe if the first direction is a one-off
                 if (isInc != givenIsInc) {
                     // at this point, two UNSAFE's thus return.
-                    System.out.println("UNSAFE 4!");
+                    System.out.println("UNSAFE 4: [isInc=" + isInc + ", givenIsInc=" + givenIsInc + "]" );
                     this.unsafeReports.add(rowOfLevels);
 
                     return;
@@ -255,7 +258,7 @@ public class SafetyReportFinder {
 
                 if (validatedDiff == UNSAFE) {
                     // at this point, two UNSAFE's thus return.
-                    System.out.println("UNSAFE 5!");
+                    System.out.println("UNSAFE 5: " + validatedDiff);
                     this.unsafeReports.add(rowOfLevels);
 
                     return;
