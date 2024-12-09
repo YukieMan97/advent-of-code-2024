@@ -25,6 +25,7 @@ public class SafetyReportFinder {
 
     public SafetyReportFinder() throws IOException {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
+//        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample.txt");
 
         assert inputStream != null;
         InputStreamReader inStreamReader = new InputStreamReader(inputStream);
@@ -78,6 +79,7 @@ public class SafetyReportFinder {
                             index + 1,
                             line,
                             null,
+                            null,
                             currDiff
                         );
 
@@ -98,12 +100,11 @@ public class SafetyReportFinder {
                     validatedDiff = validateDirectionConsistency(isInc, currDiff);
 
                     if (validatedDiff == UNSAFE) {
-                        if (index + 1 > rowOfLevels.size()) {
-                            // first UNSAFE is caused by the last index, so this is fine
+                        if (index + 1 >= rowOfLevels.size()) {
+                            // first UNSAFE is caused by the last index, so this is considered SAFE
                             validatedDiff = SAFE;
                         } else {
-                            // todo handle middle indexes
-                            handleUnsafeReports(rowOfLevels, index + 1, line, prevDiff, currDiff);
+                            handleUnsafeReports(rowOfLevels, index, line, isInc, prevDiff, currDiff);
                         }
 
                         break;
@@ -170,12 +171,21 @@ public class SafetyReportFinder {
         return BIG_DIFF;
     }
 
+    /**
+     * This method handles unsafe reports caused by the first or middle indexes
+     * @param rowOfLevels
+     * @param currIndex
+     * @param line
+     * @param prevDiff
+     * @param currDiff
+     */
     private void handleUnsafeReports(
             List<Integer> rowOfLevels,
             int currIndex,
-            String line,            // for sout
+            String line,     // for sout
+            Boolean givenIsInc,
             String prevDiff,
-            String currDiff
+            String givenCurrDiff
     ) {
         System.out.println(line);
 
@@ -184,23 +194,80 @@ public class SafetyReportFinder {
 
         // case: first to second index is unsafe
         if (prevDiff == null) {
-            if (!handleFirstCase(rowOfLevels, currIndex, currDiff)) return;
+            validateUnsafeReportOfFirstIndex(rowOfLevels, currIndex);
         } else {
             // todo handle middle indexes (this is where two pointer system should be used
             //  bc need to check for BIG_DIFF when remove an index)
             System.out.println("Handle middle indexes");
-            this.unsafeReports.add(rowOfLevels);
+
+            // note: prevDiff is the expected diff, since currDiff is invalid caused by get(i - 2) and get(i - 1).
+            // thus, need to check if currIndex (i) is safe with prevPrevIndex (i - 2)
+
+            // todo find new currDiff
+            int prevLvl = rowOfLevels.get(currIndex - 1);
+            int currLvl = rowOfLevels.get(currIndex);
+
+            String currDiff = findSafeDiff(prevLvl, currLvl);
+            boolean isInc;
+
+            switch (currDiff) {
+                case INCREASING -> isInc = true;
+                case DECREASING -> isInc = false;
+                default -> {
+                    // at this point, two UNSAFE's thus return.
+                    System.out.println("UNSAFE 3!");
+                    this.unsafeReports.add(rowOfLevels);
+
+                    return;
+                }
+            }
+
+            if (currIndex > 3) {
+                // it is considered safe if the first direction is a one-off
+                if (isInc != givenIsInc) {
+                    // at this point, two UNSAFE's thus return.
+                    System.out.println("UNSAFE 4!");
+                    this.unsafeReports.add(rowOfLevels);
+
+                    return;
+                }
+            }
+
+            // at this point, only one UNSAFE
+            String validatedDiff = validateDirectionConsistency(isInc, currDiff);
+            currIndex++;
+
+            for (int i = currIndex; i < rowOfLevels.size(); i++) {
+                prevLvl = currLvl;
+                currLvl = rowOfLevels.get(i);
+
+                currDiff = findSafeDiff(prevLvl, currLvl);
+                validatedDiff = validateDirectionConsistency(isInc, currDiff);
+
+                if (validatedDiff == UNSAFE) {
+                    // at this point, two UNSAFE's thus return.
+                    System.out.println("UNSAFE 5!");
+                    this.unsafeReports.add(rowOfLevels);
+
+                    return;
+                }
+
+                currIndex++;
+            }
+
+            if (validatedDiff != UNSAFE) {
+                System.out.println("SAFE!");
+                incSafeReports(rowOfLevels);
+            }
         }
     }
 
-    private boolean handleFirstCase(List<Integer> rowOfLevels, int currIndex, String currDiff) {
-        String prevDiff;
+    private boolean validateUnsafeReportOfFirstIndex(List<Integer> rowOfLevels, int currIndex) {
         // note at this point, currDiff either EQUAL or BIG_DIFF
-        prevDiff = currDiff;
         int prevLvl = rowOfLevels.get(currIndex);
         int currLvl = rowOfLevels.get(currIndex + 1);
 
-        currDiff = findSafeDiff(prevLvl, currLvl);
+        String currDiff = findSafeDiff(prevLvl, currLvl);
         boolean isInc;
 
         switch (currDiff) {
@@ -220,7 +287,6 @@ public class SafetyReportFinder {
         currIndex += 2;
 
         for (int i = currIndex; i < rowOfLevels.size(); i++) {
-            prevDiff = currDiff;
             prevLvl = currLvl;
             currLvl = rowOfLevels.get(i);
 
