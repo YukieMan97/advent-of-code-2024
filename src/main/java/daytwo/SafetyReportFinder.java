@@ -196,16 +196,25 @@ public class SafetyReportFinder {
         if (prevDiff == null) {
             validateUnsafeReportOfFirstIndex(rowOfLevels, currIndex);
         } else {
-            // todo handle middle indexes (this is where two pointer system should be used
-            //  bc need to check for BIG_DIFF when remove an index)
             System.out.println("Handle middle indexes");
 
-            // note: prevDiff is the expected diff, since currDiff is invalid caused by get(i - 2) and get(i - 1).
-            // thus, need to check if currIndex (i) is safe with prevPrevIndex (i - 2)
 
             // todo find new currDiff
-            int prevLvl = rowOfLevels.get(currIndex - 1);
-            int currLvl = rowOfLevels.get(currIndex);
+            int prevLvl;
+            int currLvl;
+
+            if (givenCurrDiff == EQUAL) {
+                // want to check if 2nd EQUAL level is safe with next level
+                prevLvl = rowOfLevels.get(currIndex);
+
+                currIndex++;
+                currLvl = rowOfLevels.get(currIndex);
+            } else {
+                // note: prevDiff is the expected diff, since currDiff is invalid caused by get(i - 2) and get(i - 1).
+                // thus, need to check if currIndex (i) is safe with prevPrevIndex (i - 2)
+                prevLvl = rowOfLevels.get(currIndex - 1);
+                currLvl = rowOfLevels.get(currIndex);
+            }
 
             String currDiff = findSafeDiff(prevLvl, currLvl);
             boolean isInc;
@@ -262,7 +271,7 @@ public class SafetyReportFinder {
         }
     }
 
-    private boolean validateUnsafeReportOfFirstIndex(List<Integer> rowOfLevels, int currIndex) {
+    private void validateUnsafeReportOfFirstIndex(List<Integer> rowOfLevels, int currIndex) {
         // note at this point, currDiff either EQUAL or BIG_DIFF
         int prevLvl = rowOfLevels.get(currIndex);
         int currLvl = rowOfLevels.get(currIndex + 1);
@@ -278,7 +287,7 @@ public class SafetyReportFinder {
                 System.out.println("UNSAFE 1!");
                 this.unsafeReports.add(rowOfLevels);
 
-                return false;
+                return;
             }
         }
 
@@ -298,7 +307,7 @@ public class SafetyReportFinder {
                 System.out.println("UNSAFE 2!");
                 this.unsafeReports.add(rowOfLevels);
 
-                return false;
+                return;
             }
 
             currIndex++;
@@ -308,8 +317,6 @@ public class SafetyReportFinder {
             System.out.println("SAFE!");
             incSafeReports(rowOfLevels);
         }
-
-        return true;
     }
 
     private void incSafeReports(List<Integer> rowOfLevels) {
