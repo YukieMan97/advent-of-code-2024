@@ -12,7 +12,6 @@ import java.util.List;
  * Day2 Part1
  */
 public class SafetyReportFinder {
-    private int numSafeReports = 0;
     private final List<List<Integer>> safeReports;
     private final List<List<Integer>> unsafeReports;
 
@@ -32,11 +31,12 @@ public class SafetyReportFinder {
 
         this.safeReports = new ArrayList<>();
         this.unsafeReports = new ArrayList<>();
-        this.numSafeReports = findSafeAndUnsafeReports(inStreamReader);
+
+        findSafeAndUnsafeReports(inStreamReader);
     }
 
     public int getNumSafeReports() {
-        return numSafeReports;
+        return this.unsafeReports.size();
     }
 
     public List<List<Integer>> getUnsafeReports() {
@@ -47,7 +47,7 @@ public class SafetyReportFinder {
         return safeReports;
     }
 
-    private int findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws IOException {
+    private void findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws IOException {
         int prevLvl;
         int currLvl;
         int numEntries = 0;
@@ -100,7 +100,7 @@ public class SafetyReportFinder {
                 }
 
                 if (validatedDiff != UNSAFE) {
-                    incSafeReports(rowOfLevels);
+                    this.safeReports.add(rowOfLevels);
                 }
             }
         }
@@ -108,15 +108,11 @@ public class SafetyReportFinder {
         int totalNumEntries = 1000;
         int nonTolerableSafeReports = 516;
         System.out.println("numEntries: " + numEntries + "; expected " + totalNumEntries);
-//        System.out.println("Non-Tolerable numSafeReports: " + numSafeReports + "; expected " + nonTolerableSafeReports);
 //        System.out.println("Non-Tolerable safeReports.size: " + safeReports.size() + "; expected " + nonTolerableSafeReports);
 //        System.out.println("Non-Tolerable unsafeReports.size: " + unsafeReports.size() + "; expected " + (totalNumEntries - nonTolerableSafeReports));
 
-        System.out.println("Tolerable numSafeReports: " + numSafeReports + "; expected ?");
         System.out.println("Tolerable safeReports.size: " + safeReports.size() + "; expected ?");
         System.out.println("Tolerable unsafeReports.size: " + unsafeReports.size() + "; expected " + (totalNumEntries - safeReports.size()));
-
-        return numSafeReports;
     }
 
     protected static String validateDirectionConsistency(boolean isInc, String resultDiff) {
@@ -153,11 +149,5 @@ public class SafetyReportFinder {
         }
 
         return BIG_DIFF;
-    }
-
-    private void incSafeReports(List<Integer> rowOfLevels) {
-        this.safeReports.add(rowOfLevels);
-
-        numSafeReports++;
     }
 }
