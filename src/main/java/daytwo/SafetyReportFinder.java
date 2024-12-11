@@ -8,19 +8,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static daytwo.DayTwoUtil.*;
+
 /**
  * Day2 Part1
  */
 public class SafetyReportFinder {
     private final List<List<Integer>> safeReports;
     private final List<List<Integer>> unsafeReports;
-
-    protected final static String INCREASING = "POSITIVE";
-    protected final static String DECREASING = "NEGATIVE";
-    protected final static String EQUAL = "EQUAL";
-    protected final static String BIG_DIFF = "BIG_DIFF";
-    protected final static String UNSAFE = "UNSAFE";
-    protected final static String SAFE = "SAFE";
 
     public SafetyReportFinder() throws IOException {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
@@ -113,41 +108,5 @@ public class SafetyReportFinder {
 
         System.out.println("Tolerable safeReports.size: " + safeReports.size() + "; expected ?");
         System.out.println("Tolerable unsafeReports.size: " + unsafeReports.size() + "; expected " + (totalNumEntries - safeReports.size()));
-    }
-
-    protected static String validateDirectionConsistency(boolean isInc, String resultDiff) {
-        if (isInc && resultDiff == INCREASING) {
-            return INCREASING;
-        }
-
-        if (!isInc && resultDiff == DECREASING) {
-            return DECREASING;
-        }
-
-        return UNSAFE;
-    }
-
-    /**
-     * Safe Difference means increasing or decreasing and a difference of 1-3 (inclusive).
-     * @param prevNum
-     * @param currNum
-     * @return
-     */
-    protected static String findSafeDiff(int prevNum, int currNum) {
-        int diff = currNum - prevNum;
-
-        if (diff == 0) {
-            return EQUAL;
-        }
-
-        if (diff > 0 && diff <= 3) {
-            return INCREASING;
-        }
-
-        if (diff < 0 && diff >= -3) {
-            return DECREASING;
-        }
-
-        return BIG_DIFF;
     }
 }

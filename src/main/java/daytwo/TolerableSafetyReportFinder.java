@@ -18,7 +18,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
          this.unsafeReports = unsafeReports;
 
          for (int i = 0; i < unsafeReports.size(); i++) {
-
+            
          }
     }
 
