@@ -8,7 +8,7 @@ public class ChiefHistorianSearch {
         SafetyReportFinder safeReportFinder = new SafetyReportFinder();
 
         TolerableSafetyReportFinder tolerableSafeReportFinder = new TolerableSafetyReportFinder(
-                safeReportFinder.getNumSafeReports(),
+                safeReportFinder.getSafeReports(),
                 safeReportFinder.getUnsafeReports()
         );
     }

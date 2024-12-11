@@ -18,7 +18,7 @@ public class SafetyReportFinder {
     private final List<List<Integer>> unsafeReports;
 
     public SafetyReportFinder() throws IOException {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample_2.txt");
 //        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample.txt");
 
         assert inputStream != null;
