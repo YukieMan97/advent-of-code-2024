@@ -7,9 +7,9 @@ public class ChiefHistorianSearch {
     public static void main(String[] args) throws IOException {
         SafetyReportFinder safeReportFinder = new SafetyReportFinder();
 
-        TolerableSafetyReportFinder tolerableSafeReportFinder = new TolerableSafetyReportFinder(
-                safeReportFinder.getSafeReports(),
-                safeReportFinder.getUnsafeReports()
-        );
+//        TolerableSafetyReportFinder tolerableSafeReportFinder = new TolerableSafetyReportFinder(
+//                safeReportFinder.getSafeReports(),
+//                safeReportFinder.getUnsafeReports()
+//        );
     }
 }

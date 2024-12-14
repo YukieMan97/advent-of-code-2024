@@ -12,6 +12,12 @@ import static daytwo.DayTwoUtil.*;
 public class TolerableSafetyReportFinder extends SafetyReportFinder {
     private List<List<Integer>> safeReports;
     private List<List<Integer>> unsafeReports;
+    // todo consider which of the following fields to keep
+    private boolean seenUnsafe = false;
+    private Boolean tolerableSafeReport = null;
+    private Boolean isInc = null;
+    private String prevToNextLvlDiff = null;
+    private String currToNextLvlDiff = null;
 
     public TolerableSafetyReportFinder(
         List<List<Integer>> safeReports,
@@ -29,87 +35,70 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
          }
     }
 
-    private boolean seenUnsafe = false;
-    private Boolean tolerableSafeReport = null;
-    private Boolean isInc = null;
-    private String prevToNextLvlDiff = null;
-    private String currToNextLvlDiff = null;
-
-    private void handleUnsafeReport(List<Integer> rowOfLevels) throws Exception {
+    private void handleUnsafeReport(List<Integer> rowOfLevels) {
         this.seenUnsafe = false;
         this.tolerableSafeReport = null;
         this.isInc = null;
         this.prevToNextLvlDiff = null;
         this.currToNextLvlDiff = null;
 
-        int prevLvl;
-        int currLvl;
-        String currDiff = null;
+        // assumption: there are at least 5 levels
+        int index = 0;
+        int prevLvl = rowOfLevels.getFirst();
+        int currLvl = rowOfLevels.get(index + 1);
 
-        for (int j = 1; j < rowOfLevels.size(); j++) {
-            prevLvl = rowOfLevels.get(j - 1);
-            currLvl = rowOfLevels.get(j);
+        String currDiff = findSafeDiff(prevLvl, currLvl);
+        boolean isInc;
 
-            currDiff = findSafeDiff(prevLvl, currLvl);
-
-            if (j + 1 > rowOfLevels.size() - 1) {
-                // can ignore last unsafe level
-                break;
-            }
-
-            // todo this part needs to be reworked to use the updated removedList
-            findIncOrDec(
-                j,
-                prevLvl,
-                currLvl,
-                rowOfLevels,
-                currDiff
-            );
-
-            if (this.isInc == null) {
+        switch (currDiff) {
+            case INCREASING -> isInc = true;
+            case DECREASING -> isInc = false;
+            default -> {
                 this.unsafeReports.add(rowOfLevels);
 
                 return;
             }
+        }
 
-            String validatedDiff;
+        String validatedDiff = validateDirectionConsistency(isInc, currDiff);
+        index += 2;
 
-            if (this.currToNextLvlDiff != null) {
-                validatedDiff = validateDirectionConsistency(this.isInc, currToNextLvlDiff);
-            } else if (this.prevToNextLvlDiff != null) {
-                validatedDiff = validateDirectionConsistency(this.isInc, prevToNextLvlDiff);
-            } else {
-                validatedDiff = validateDirectionConsistency(this.isInc, currDiff);
+        for (int i = index; i < rowOfLevels.size(); i++) {
+
+            // note: this is added for p2
+            if (i + 1 > rowOfLevels.size() - 1) {
+                // can ignore last unsafe level
+                break;
             }
+
+            prevLvl = currLvl;
+            currLvl = rowOfLevels.get(i);
+
+            currDiff = findSafeDiff(prevLvl, currLvl);
+            validatedDiff = validateDirectionConsistency(isInc, currDiff);
 
             if (validatedDiff == UNSAFE) {
-                if (this.seenUnsafe) {
-                    this.tolerableSafeReport = false;
-                    break;
-                }
-            }
-
-        }
-
-        if (this.tolerableSafeReport != null) {
-            if (this.tolerableSafeReport) {
-                this.safeReports.add(rowOfLevels);
-            } else {
                 this.unsafeReports.add(rowOfLevels);
+
+                break;
             }
-        } else {
-            throw new Exception("Non-deterministic SafeReport");
+
+            index++;
         }
 
+        if (validatedDiff != UNSAFE) {
+            this.safeReports.add(rowOfLevels);
+        }
     }
 
+    // todo not use in p2
     private int findIncOrDec(
         int currIndex,
         int prevLvl,
         int currLvl,
         List<Integer> rowOfLevels,
         String currDiff
-    ) throws Exception {
+    ) {
         List<Integer> prevLvlRemovedList;
         List<Integer> currLvlRemovedList;
 
@@ -155,6 +144,8 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 // todo iterate over prevLvlRemovedList;
             }
         }
+
+        return 0;
     }
 
     public int getNumSafeReports() {
