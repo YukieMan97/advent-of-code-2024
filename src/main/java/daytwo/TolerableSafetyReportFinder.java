@@ -12,12 +12,6 @@ import static daytwo.DayTwoUtil.*;
 public class TolerableSafetyReportFinder extends SafetyReportFinder {
     private List<List<Integer>> safeReports;
     private List<List<Integer>> unsafeReports;
-    // todo consider which of the following fields to keep
-    private boolean seenUnsafe = false;
-    private Boolean tolerableSafeReport = null;
-    private Boolean isInc = null;
-    private String prevToNextLvlDiff = null;
-    private String currToNextLvlDiff = null;
 
     public TolerableSafetyReportFinder(
         List<List<Integer>> safeReports,
@@ -38,14 +32,11 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
     }
 
     private void handleUnsafeReport(List<Integer> rowOfLevels) throws Exception {
-        this.seenUnsafe = false;
-        this.tolerableSafeReport = null;
-        this.isInc = null;
-        this.prevToNextLvlDiff = null;
-        this.currToNextLvlDiff = null;
-
         List<Integer> removeFirstIndexList = null;
         List<Integer> removeSecondIndexList = null;
+        String prevToNextLvlDiff = null;
+        String currToNextLvlDiff = null;
+        boolean seenUnsafe = false;
 
         // assumption: there are at least 5 levels
         int index = 0;
@@ -61,6 +52,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             default -> {
                 seenUnsafe = true;
 
+                // todo check if first and third indices are safe first?
                 removeFirstIndexList = new ArrayList<>(rowOfLevels);
                 removeFirstIndexList.remove(index);
 
