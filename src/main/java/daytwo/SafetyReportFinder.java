@@ -17,7 +17,7 @@ public class SafetyReportFinder {
     private final List<List<Integer>> unsafeReports;
 
     public SafetyReportFinder() throws Exception {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample.txt");
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_tests.txt");
 
         assert inputStream != null;
         InputStreamReader inStreamReader = new InputStreamReader(inputStream);
@@ -98,13 +98,12 @@ public class SafetyReportFinder {
             }
         }
 
-        int totalNumEntries = 1000;
         int nonTolerableSafeReports = 516;
-        System.out.println("numEntries: " + numEntries + "; expected " + totalNumEntries);
+        System.out.println("numEntries: " + numEntries);
 //        System.out.println("Non-Tolerable safeReports.size: " + safeReports.size() + "; expected " + nonTolerableSafeReports);
 //        System.out.println("Non-Tolerable unsafeReports.size: " + unsafeReports.size() + "; expected " + (totalNumEntries - nonTolerableSafeReports));
 
-        System.out.println("Tolerable safeReports.size: " + safeReports.size() + "; expected ?");
-        System.out.println("Tolerable unsafeReports.size: " + unsafeReports.size() + "; expected " + (totalNumEntries - safeReports.size()));
+        System.out.println("Tolerable safeReports.size: " + safeReports.size());
+        System.out.println("Tolerable unsafeReports.size: " + unsafeReports.size() + "; expected " + (numEntries - safeReports.size()));
     }
 }
