@@ -22,7 +22,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
     public TolerableSafetyReportFinder(
         List<List<Integer>> safeReports,
         List<List<Integer>> unsafeReports
-    ) throws IOException {
+    ) throws Exception {
          this.safeReports = safeReports;
          this.unsafeReports = unsafeReports;
 
@@ -33,33 +33,184 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
 
              handleUnsafeReport(rowOfLevels);
          }
+
+        System.out.println("tolerableSafeReports: " + safeReports.size());
     }
 
-    private void handleUnsafeReport(List<Integer> rowOfLevels) {
+    private void handleUnsafeReport(List<Integer> rowOfLevels) throws Exception {
         this.seenUnsafe = false;
         this.tolerableSafeReport = null;
         this.isInc = null;
         this.prevToNextLvlDiff = null;
         this.currToNextLvlDiff = null;
 
+        List<Integer> removeFirstIndexList = null;
+        List<Integer> removeSecondIndexList = null;
+
         // assumption: there are at least 5 levels
         int index = 0;
-        int prevLvl = rowOfLevels.getFirst();
+        int prevLvl = rowOfLevels.get(index);
         int currLvl = rowOfLevels.get(index + 1);
 
         String currDiff = findSafeDiff(prevLvl, currLvl);
-        boolean isInc;
+        Boolean isInc = null;
 
         switch (currDiff) {
             case INCREASING -> isInc = true;
             case DECREASING -> isInc = false;
             default -> {
-                this.unsafeReports.add(rowOfLevels);
+                // note: prev implementation
+//                this.unsafeReports.add(rowOfLevels);
 
+                // todo
+                //  1. set seenUnsafe = true
+                seenUnsafe = true;
+
+                // todo
+                //  2. create two lists
+                //      - one removes the first index
+                //      - one removes the second index
+
+                removeFirstIndexList = new ArrayList<>(rowOfLevels);
+                removeFirstIndexList.remove(index);
+
+                removeSecondIndexList = new ArrayList<>(rowOfLevels);
+                removeSecondIndexList.remove(index);
+            }
+        }
+
+        // todo
+        //  3. check which list is safe
+        //      - if at least one is safe, add the OG list to this.safeReports,
+        //          otherwise, add the OG list to this.unsafeReports
+
+        boolean checkSecondList = false;
+
+        // todo check the first list
+        if (removeFirstIndexList != null) {
+            // assumption: there are at least 5 levels
+            int index2 = 0;
+            int prevLvl2 = removeFirstIndexList.get(index2);
+            int currLvl2 = removeFirstIndexList.get(index2 + 1);
+
+            String currDiff2 = findSafeDiff(prevLvl2, currLvl2);
+            Boolean isInc2 = null;
+
+            switch (currDiff2) {
+                case INCREASING -> isInc2 = true;
+                case DECREASING -> isInc2 = false;
+                default -> {
+                    // todo removeFirstIndexList is not safe, so check removeSecondIndexList now
+                    checkSecondList = true;
+                }
+            }
+
+            if (!checkSecondList) {
+                // note: removeFirstIndexList is safe so far
+                // note: prev implementation
+                String validatedDiff2 = validateDirectionConsistency(isInc2, currDiff2);
+                index2 += 2;
+
+                for (int i = index2; i < removeFirstIndexList.size(); i++) {
+
+                    // note: this is added for p2
+                    if (i + 1 > removeFirstIndexList.size() - 1) {
+                        // at this point, seenUnsafe should be true, thus CANNOT ignore last unsafe level
+                        assert seenUnsafe;
+
+                        return;
+                    }
+
+                    prevLvl2 = currLvl2;
+                    currLvl2 = removeFirstIndexList.get(i);
+
+                    currDiff2 = findSafeDiff(prevLvl2, currLvl2);
+                    validatedDiff2 = validateDirectionConsistency(isInc2, currDiff2);
+
+                    if (validatedDiff2 == UNSAFE) {
+                        // at this point, seenUnsafe should be true
+                        assert seenUnsafe;
+
+                        return;
+                    }
+
+                    index2++;
+                }
+
+                if (validatedDiff2 != UNSAFE) {
+                    // at this point, removeFirstIndexList is safe, so add the OG list to this.safeReports
+                    this.safeReports.add(rowOfLevels);
+
+                    // then no need to check the removeSecondIndexList
+                    return;
+                }
+
+                checkSecondList = true;
+            }
+        }
+
+        // todo check the second list if needed
+        if (checkSecondList) {
+            // assumption: there are at least 5 levels
+            int index3 = 0;
+            int prevLvl3 = removeFirstIndexList.get(index3);
+            int currLvl3 = removeFirstIndexList.get(index3 + 1);
+
+            String currDiff3 = findSafeDiff(prevLvl3, currLvl3);
+            boolean isInc3;
+
+            switch (currDiff3) {
+                case INCREASING -> isInc3 = true;
+                case DECREASING -> isInc3 = false;
+                default -> {
+                    // note removeFirstIndexList and removeSecondIndexList are both unsafe
+
+                    return;
+                }
+            }
+
+            // note: removeSecondIndexList is safe so far
+            // note: prev implementation
+            String validatedDiff3 = validateDirectionConsistency(isInc3, currDiff3);
+            index3 += 2;
+
+            for (int i = index3; i < removeSecondIndexList.size(); i++) {
+
+                // note: this is added for p2
+                if (i + 1 > removeSecondIndexList.size() - 1) {
+                    // at this point, seenUnsafe should be true, thus CANNOT ignore last unsafe level
+                    assert seenUnsafe;
+
+                    return;
+                }
+
+                prevLvl3 = currLvl3;
+                currLvl3 = removeSecondIndexList.get(i);
+
+                currDiff3 = findSafeDiff(prevLvl3, currLvl3);
+                validatedDiff3 = validateDirectionConsistency(isInc3, currDiff3);
+
+                if (validatedDiff3 == UNSAFE) {
+                    // at this point, seenUnsafe should be true
+                    assert seenUnsafe;
+
+                    return;
+                }
+
+                index3++;
+            }
+
+            if (validatedDiff3 != UNSAFE) {
+                // at this point, removeSecondIndexList is safe, so add the OG list to this.safeReports
+                this.safeReports.add(rowOfLevels);
+
+                // then no need to check the rest of the OG list
                 return;
             }
         }
 
+        // todo at this point, the first and second indices are safe, check the rest of the indices for OG list
+        // note: prev implementation
         String validatedDiff = validateDirectionConsistency(isInc, currDiff);
         index += 2;
 
@@ -67,7 +218,11 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
 
             // note: this is added for p2
             if (i + 1 > rowOfLevels.size() - 1) {
-                // can ignore last unsafe level
+                // can ignore checking the last unsafe level if not seen any unsafe levels yet
+                if (seenUnsafe) {
+                    return;
+                }
+
                 break;
             }
 
@@ -78,9 +233,10 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             validatedDiff = validateDirectionConsistency(isInc, currDiff);
 
             if (validatedDiff == UNSAFE) {
-                this.unsafeReports.add(rowOfLevels);
-
-                break;
+                // can ignore middle unsafe level if not seen any unsafe levels yet
+                if (seenUnsafe) {
+                    return;
+                }
             }
 
             index++;

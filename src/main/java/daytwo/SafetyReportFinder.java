@@ -17,7 +17,7 @@ public class SafetyReportFinder {
     private final List<List<Integer>> safeReports;
     private final List<List<Integer>> unsafeReports;
 
-    public SafetyReportFinder() throws IOException {
+    public SafetyReportFinder() throws Exception {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
 //        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample.txt");
 
@@ -42,7 +42,7 @@ public class SafetyReportFinder {
         return safeReports;
     }
 
-    private void findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws IOException {
+    private void findSafeAndUnsafeReports(InputStreamReader inStreamReader) throws Exception {
         int prevLvl;
         int currLvl;
         int numEntries = 0;
@@ -59,7 +59,7 @@ public class SafetyReportFinder {
 
                 // assumption: there are at least 5 levels
                 int index = 0;
-                prevLvl = rowOfLevels.getFirst();
+                prevLvl = rowOfLevels.get(index);
                 currLvl = rowOfLevels.get(index + 1);
 
                 String currDiff = findSafeDiff(prevLvl, currLvl);

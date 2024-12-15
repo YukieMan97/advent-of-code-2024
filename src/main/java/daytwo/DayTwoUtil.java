@@ -6,6 +6,7 @@ public class DayTwoUtil {
     protected final static String EQUAL = "EQUAL";
     protected final static String BIG_DIFF = "BIG_DIFF";
     protected final static String UNSAFE = "UNSAFE";
+    protected final static String SAFE = "SAFE";
 
     /**
      * Safe Difference satisfies the following criteria:
@@ -41,7 +42,11 @@ public class DayTwoUtil {
      * @param resultDiff
      * @return
      */
-    protected static String validateDirectionConsistency(boolean isInc, String resultDiff) {
+    protected static String validateDirectionConsistency(Boolean isInc, String resultDiff) throws Exception {
+        if (isInc == null) {
+            throw new Exception("isInc should not be null");
+        }
+
         if (isInc && resultDiff == INCREASING) {
             return INCREASING;
         }
