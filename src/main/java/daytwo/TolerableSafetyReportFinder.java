@@ -122,13 +122,14 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 for (int i = index2; i < removeFirstIndexList.size(); i++) {
 
                     // note: this is added for p2
-                    if (i + 1 > removeFirstIndexList.size() - 1) {
-                        // at this point, seenUnsafe should be true, thus CANNOT ignore last unsafe level
-                        assert seenUnsafe;
-
-                        System.out.println("1: " + removeFirstIndexList);
-                        return;
-                    }
+//                    if (i + 1 > removeFirstIndexList.size() - 1) {
+//                        // todo need to check if last will be unsafe
+//                        // at this point, seenUnsafe should be true, thus CANNOT ignore last unsafe level
+//                        assert seenUnsafe;
+//
+//                        System.out.println("1: " + removeFirstIndexList);
+//                        return;
+//                    }
 
                     prevLvl2 = currLvl2;
                     currLvl2 = removeFirstIndexList.get(i);
@@ -163,8 +164,8 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         if (checkSecondList) {
             // assumption: there are at least 5 levels
             int index3 = 0;
-            int prevLvl3 = removeFirstIndexList.get(index3);
-            int currLvl3 = removeFirstIndexList.get(index3 + 1);
+            int prevLvl3 = removeSecondIndexList.get(index3);
+            int currLvl3 = removeSecondIndexList.get(index3 + 1);
 
             String currDiff3 = findSafeDiff(prevLvl3, currLvl3);
             boolean isInc3;
@@ -175,7 +176,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 default -> {
                     // note removeFirstIndexList and removeSecondIndexList are both unsafe
 
-                    System.out.println("4: " + removeFirstIndexList);
+                    System.out.println("4: " + removeSecondIndexList);
                     return;
                 }
             }
