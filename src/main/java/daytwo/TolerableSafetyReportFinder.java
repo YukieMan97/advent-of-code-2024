@@ -273,13 +273,8 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     }
 
                     if (isNextInc == isInc) {
-//                        if (index + 2 < rowOfLevels.size()) {
-                            index += 2;
-                            i = index;
-//                        } else {
-//                            System.out.println("11: (safe) " + rowOfLevels);
-//                            return;
-//                        }
+                        index += 2;
+                        i = index;
 
                         continue;
                     }
@@ -290,7 +285,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         }
 
         if (validatedDiff != UNSAFE) {
-            System.out.println("12: (safe) " + rowOfLevels);
+            System.out.println("11: (safe) " + rowOfLevels);
             this.safeReports.add(rowOfLevels);
         }
     }
