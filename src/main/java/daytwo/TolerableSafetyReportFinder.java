@@ -232,12 +232,17 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         for (int i = index; i < rowOfLevels.size(); i++) {
             // note: this is added for p2
 
+            // todo for the last index...
+            //  if seenUnsafe == true, we need to check the last index
+            //  if seenUnsafe == false, we don't need to check the last index, thus we can assume the levels are safe
             if (i + 1 > rowOfLevels.size() - 1) {
-                // can ignore checking the last unsafe level if not seen any unsafe levels yet
-                if (!seenUnsafe) {
-                    System.out.println("8: " + rowOfLevels);
-                    return;
+                if (seenUnsafe) {
+                    continue;
+                } else {
+                    validatedDiff = SAFE;
                 }
+
+                break;
             }
 
             prevLvl = currLvl;
@@ -249,7 +254,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             if (validatedDiff == UNSAFE) {
                 // can ignore middle unsafe level if not seen any unsafe levels yet
                 if (seenUnsafe) {
-                    System.out.println("9: " + rowOfLevels);
+                    System.out.println("10: " + rowOfLevels);
                     return;
                 } else {
                     seenUnsafe = true;
@@ -264,7 +269,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                         case INCREASING -> isNextInc = true;
                         case DECREASING -> isNextInc = false;
                         default -> {
-                            System.out.println("10: " + rowOfLevels);
+                            System.out.println("11: " + rowOfLevels);
 
                             return;
                         }
@@ -283,7 +288,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         }
 
         if (validatedDiff != UNSAFE) {
-            System.out.println("11: (safe) " + rowOfLevels);
+            System.out.println("12: (safe) " + rowOfLevels);
             this.safeReports.add(rowOfLevels);
         }
     }
