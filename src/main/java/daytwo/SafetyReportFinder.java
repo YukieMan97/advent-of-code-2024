@@ -1,7 +1,6 @@
 package daytwo;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -18,8 +17,7 @@ public class SafetyReportFinder {
     private final List<List<Integer>> unsafeReports;
 
     public SafetyReportFinder() throws Exception {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input.txt");
-//        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample.txt");
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("d2_input_sample.txt");
 
         assert inputStream != null;
         InputStreamReader inStreamReader = new InputStreamReader(inputStream);
