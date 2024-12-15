@@ -232,17 +232,15 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         for (int i = index; i < rowOfLevels.size(); i++) {
             // note: this is added for p2
 
-            // todo for the last index...
-            //  if seenUnsafe == true, we need to check the last index
-            //  if seenUnsafe == false, we don't need to check the last index, thus we can assume the levels are safe
+//            // todo for the last index
+//            //  if seenUnsafe == true, we need to check the prevLvl and currLvl
+//            //  if seenUnsafe == false, it doesn't matter if last index is unsafe or not, so skip the check
             if (i + 1 > rowOfLevels.size() - 1) {
-                if (seenUnsafe) {
-                    continue;
-                } else {
+                if (!seenUnsafe) {
                     validatedDiff = SAFE;
-                }
 
-                break;
+                    break;
+                }
             }
 
             prevLvl = currLvl;
