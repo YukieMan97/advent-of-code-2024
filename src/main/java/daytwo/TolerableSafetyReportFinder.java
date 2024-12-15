@@ -257,7 +257,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     seenUnsafe = true;
 
                     // todo check if prevLvl and nextLvl is ok. if ok, then increment index by 2
-                    int nextLvl = rowOfLevels.get(index + 2);
+                    int nextLvl = rowOfLevels.get(index + 1);
 
                     validatedDiff = findSafeDiff(prevLvl, nextLvl);
                     Boolean isNextInc;
@@ -273,8 +273,13 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     }
 
                     if (isNextInc == isInc) {
-                        index += 2;
-                        i = index;
+//                        if (index + 2 < rowOfLevels.size()) {
+                            index += 2;
+                            i = index;
+//                        } else {
+//                            System.out.println("11: (safe) " + rowOfLevels);
+//                            return;
+//                        }
 
                         continue;
                     }
@@ -285,7 +290,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         }
 
         if (validatedDiff != UNSAFE) {
-            System.out.println("11: (safe) " + rowOfLevels);
+            System.out.println("12: (safe) " + rowOfLevels);
             this.safeReports.add(rowOfLevels);
         }
     }
