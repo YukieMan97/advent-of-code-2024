@@ -34,8 +34,6 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
     private void handleUnsafeReport(List<Integer> rowOfLevels) throws Exception {
         List<Integer> removeFirstIndexList = null;
         List<Integer> removeSecondIndexList = null;
-        String prevToNextLvlDiff = null;
-        String currToNextLvlDiff = null;
         boolean seenUnsafe = false;
 
         // assumption: there are at least 5 levels
@@ -57,7 +55,42 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 removeFirstIndexList.remove(index);
 
                 removeSecondIndexList = new ArrayList<>(rowOfLevels);
-                removeSecondIndexList.remove(index);
+                removeSecondIndexList.remove(index + 1);
+            }
+        }
+
+        if (isInc != null) {
+            // todo check if the pattern stays the same for the next set
+            int nextLvl = rowOfLevels.get(index + 2);
+
+            String nextDiff = findSafeDiff(currLvl, nextLvl);
+            Boolean isNextInc = null;
+
+            switch (nextDiff) {
+                case INCREASING -> isNextInc = true;
+                case DECREASING -> isNextInc = false;
+            }
+
+            if (isNextInc == null) {
+                seenUnsafe = true;
+
+                // todo check if first and third indices are safe first?
+                removeFirstIndexList = new ArrayList<>(rowOfLevels);
+                removeFirstIndexList.remove(index);
+
+                removeSecondIndexList = new ArrayList<>(rowOfLevels);
+                removeSecondIndexList.remove(index + 1);
+            } else {
+                if (isInc != isNextInc) {
+                    seenUnsafe = true;
+
+                    // todo check if first and third indices are safe first?
+                    removeFirstIndexList = new ArrayList<>(rowOfLevels);
+                    removeFirstIndexList.remove(index);
+
+                    removeSecondIndexList = new ArrayList<>(rowOfLevels);
+                    removeSecondIndexList.remove(index + 1);
+                }
             }
         }
 
@@ -93,6 +126,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                         // at this point, seenUnsafe should be true, thus CANNOT ignore last unsafe level
                         assert seenUnsafe;
 
+                        System.out.println("1: " + removeFirstIndexList);
                         return;
                     }
 
@@ -106,6 +140,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                         // at this point, seenUnsafe should be true
                         assert seenUnsafe;
 
+                        System.out.println("2: " + removeFirstIndexList);
                         return;
                     }
 
@@ -117,6 +152,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     this.safeReports.add(rowOfLevels);
 
                     // then no need to check the removeSecondIndexList
+                    System.out.println("3: (safe) " + rowOfLevels);
                     return;
                 }
 
@@ -139,6 +175,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 default -> {
                     // note removeFirstIndexList and removeSecondIndexList are both unsafe
 
+                    System.out.println("4: " + removeFirstIndexList);
                     return;
                 }
             }
@@ -155,6 +192,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     // at this point, seenUnsafe should be true, thus CANNOT ignore last unsafe level
                     assert seenUnsafe;
 
+                    System.out.println("5: " + rowOfLevels);
                     return;
                 }
 
@@ -168,6 +206,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     // at this point, seenUnsafe should be true
                     assert seenUnsafe;
 
+                    System.out.println("6: " + removeSecondIndexList);
                     return;
                 }
 
@@ -179,6 +218,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 this.safeReports.add(rowOfLevels);
 
                 // then no need to check the rest of the OG list
+                System.out.println("7 (safe): " + rowOfLevels);
                 return;
             }
         }
@@ -195,6 +235,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 // can ignore checking the last unsafe level if not seen any unsafe levels yet
                 // todo maybe can just iterate until second last element (change forloop break condition)
                 if (seenUnsafe) {
+                    System.out.println("8: " + rowOfLevels);
                     return;
                 }
 
@@ -210,6 +251,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             if (validatedDiff == UNSAFE) {
                 // can ignore middle unsafe level if not seen any unsafe levels yet
                 if (seenUnsafe) {
+                    System.out.println("9: " + rowOfLevels);
                     return;
                 }
             }
@@ -218,6 +260,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         }
 
         if (validatedDiff != UNSAFE) {
+            System.out.println("10: (safe) " + rowOfLevels);
             this.safeReports.add(rowOfLevels);
         }
     }
