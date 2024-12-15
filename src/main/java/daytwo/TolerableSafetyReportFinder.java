@@ -59,17 +59,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             case INCREASING -> isInc = true;
             case DECREASING -> isInc = false;
             default -> {
-                // note: prev implementation
-//                this.unsafeReports.add(rowOfLevels);
-
-                // todo
-                //  1. set seenUnsafe = true
                 seenUnsafe = true;
-
-                // todo
-                //  2. create two lists
-                //      - one removes the first index
-                //      - one removes the second index
 
                 removeFirstIndexList = new ArrayList<>(rowOfLevels);
                 removeFirstIndexList.remove(index);
@@ -79,14 +69,8 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             }
         }
 
-        // todo
-        //  3. check which list is safe
-        //      - if at least one is safe, add the OG list to this.safeReports,
-        //          otherwise, add the OG list to this.unsafeReports
-
         boolean checkSecondList = false;
 
-        // todo check the first list
         if (removeFirstIndexList != null) {
             // assumption: there are at least 5 levels
             int index2 = 0;
@@ -99,10 +83,9 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             switch (currDiff2) {
                 case INCREASING -> isInc2 = true;
                 case DECREASING -> isInc2 = false;
-                default -> {
-                    // todo removeFirstIndexList is not safe, so check removeSecondIndexList now
+                default ->
+                    // at this point, removeFirstIndexList is not safe, so check removeSecondIndexList now
                     checkSecondList = true;
-                }
             }
 
             if (!checkSecondList) {
@@ -149,7 +132,6 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             }
         }
 
-        // todo check the second list if needed
         if (checkSecondList) {
             // assumption: there are at least 5 levels
             int index3 = 0;
@@ -209,7 +191,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             }
         }
 
-        // todo at this point, the first and second indices are safe, check the rest of the indices for OG list
+        // At this point, the first and second indices are safe, check the rest of the indices for OG list
         // note: prev implementation
         String validatedDiff = validateDirectionConsistency(isInc, currDiff);
         index += 2;
@@ -219,6 +201,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
             // note: this is added for p2
             if (i + 1 > rowOfLevels.size() - 1) {
                 // can ignore checking the last unsafe level if not seen any unsafe levels yet
+                // todo maybe can just iterate until second last element (change forloop break condition)
                 if (seenUnsafe) {
                     return;
                 }
@@ -245,63 +228,6 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
         if (validatedDiff != UNSAFE) {
             this.safeReports.add(rowOfLevels);
         }
-    }
-
-    // todo not use in p2
-    private int findIncOrDec(
-        int currIndex,
-        int prevLvl,
-        int currLvl,
-        List<Integer> rowOfLevels,
-        String currDiff
-    ) {
-        List<Integer> prevLvlRemovedList;
-        List<Integer> currLvlRemovedList;
-
-        switch (currDiff) {
-            case INCREASING -> this.isInc = true;
-            case DECREASING -> this.isInc = false;
-            default -> {
-                if (this.seenUnsafe) {
-                    break;
-                }
-
-                this.seenUnsafe = true;
-
-                int nextLvl = rowOfLevels.get(currIndex + 1);
-
-                prevToNextLvlDiff = findSafeDiff(prevLvl, nextLvl);
-
-                switch (prevToNextLvlDiff) {
-                    case INCREASING -> this.isInc = true;
-                    case DECREASING -> this.isInc = false;
-                    default -> {
-                        currToNextLvlDiff = findSafeDiff(currLvl, nextLvl);
-
-                        switch (currToNextLvlDiff) {
-                            case INCREASING -> this.isInc = true;
-                            case DECREASING -> this.isInc = false;
-                            default -> {
-                                // need to remove both levels, thus unsafe report
-                                // todo break
-                            }
-                        }
-
-                        currLvlRemovedList = new ArrayList<>(rowOfLevels);
-                        currLvlRemovedList.remove(currIndex);
-
-                        // todo iterate over currLvlRemovedList
-                    }
-                }
-
-                prevLvlRemovedList = new ArrayList<>(rowOfLevels);
-                prevLvlRemovedList.remove(currIndex - 1);
-
-                // todo iterate over prevLvlRemovedList;
-            }
-        }
-
-        return 0;
     }
 
     public int getNumSafeReports() {
