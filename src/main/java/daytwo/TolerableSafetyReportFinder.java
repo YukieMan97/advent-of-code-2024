@@ -141,7 +141,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                         // at this point, seenUnsafe should be true
                         assert seenUnsafe;
 
-                        System.out.println("2: " + removeFirstIndexList);
+                        System.out.println("2: " + rowOfLevels);
                         return;
                     }
 
@@ -176,7 +176,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                 default -> {
                     // note removeFirstIndexList and removeSecondIndexList are both unsafe
 
-                    System.out.println("4: " + removeSecondIndexList);
+                    System.out.println("4: " + rowOfLevels);
                     return;
                 }
             }
@@ -207,7 +207,7 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
                     // at this point, seenUnsafe should be true
                     assert seenUnsafe;
 
-                    System.out.println("6: " + removeSecondIndexList);
+                    System.out.println("6: " + rowOfLevels);
                     return;
                 }
 
@@ -231,15 +231,13 @@ public class TolerableSafetyReportFinder extends SafetyReportFinder {
 
         for (int i = index; i < rowOfLevels.size(); i++) {
             // note: this is added for p2
+
             if (i + 1 > rowOfLevels.size() - 1) {
                 // can ignore checking the last unsafe level if not seen any unsafe levels yet
-                // todo maybe can just iterate until second last element (change forloop break condition)
-                if (seenUnsafe) {
+                if (!seenUnsafe) {
                     System.out.println("8: " + rowOfLevels);
                     return;
                 }
-
-                break;
             }
 
             prevLvl = currLvl;
